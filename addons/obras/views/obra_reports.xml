@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- VISTA GENERAL -->
+    <record id="action_report_obra" model="ir.actions.report">
+        <field name="name">Presupuesto de Obra</field>
+        <field name="model">obras.obra</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">obras.report_obra_template</field>
+        <field name="report_file">obras.report_obra_template</field>
+        <field name="print_report_name">'Presupuesto - %s' % (object.name)</field>
+        <field name="binding_model_id" ref="model_obras_obra" />
+        <field name="binding_type">report</field>
+    </record>
+
+    <!-- PLANTILLA DOCUMENTOS PDFS -->
+    <template id="report_obra_template">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <div class="oe_structure" />
+
+                        <h2 class="text-center mt-4">PRESUPUESTO DE OBRA</h2>
+                        <hr />
+
+                        <div class="row mt-4">
+                            <div class="col-6">
+                                <strong>Nombre de la Obra:</strong>
+                                <p t-field="o.name" />
+                            </div>
+                            <div class="col-6 text-end">
+                                <strong>Fecha:</strong>
+                                <p t-field="o.create_date" t-options='{"widget": "date"}'/>
+                            </div>
+                        </div>
+
+                        <table class="table table-sm o_main_table mt-4">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th>Concepto</th>
+                                    <th class="text-end">Importe</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Coste Base de Ejecución</td>
+                                    <td class="text-end"><span t-field="o.coste" /> €</td>
+                                </tr>
+                                <tr>
+                                    <td>IVA (21%)</td>
+                                    <td class="text-end"><span t-field="o.iva" /> €</td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <div class="row justify-content-end">
+                            <div class="col-4">
+                                <table class="table table-sm">
+                                    <tr class="border-black o_total">
+                                        <td>
+                                            <strong>TOTAL</strong>
+                                        </td>
+                                        <td class="text-end">
+                                            <span class="text-nowrap" t-field="o.total" /> € </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="mt-5 text-center" t-if="o.aceptada">
+                            <span class="badge bg-success" style="font-size: 1.2em;">OBRA ACEPTADA</span>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>
