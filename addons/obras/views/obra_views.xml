@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_obra_list" model="ir.ui.view">
+        <field name="name">obras.obra.list</field>
+        <field name="model">obras.obra</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="coste"/>
+                <field name="aceptada"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_obras" model="ir.actions.act_window"> 
+        <field name="name">Obras</field>
+        <field name="res_model">obras.obra</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <menuitem id="menu_obras_root" name="Obras App"/>
+    <menuitem id="menu_obras_list" name="Mis Obras" parent="menu_obras_root" action="action_obras"/>
+</odoo>
