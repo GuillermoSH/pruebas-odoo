@@ -5,19 +5,60 @@
         <field name="model">obras.obra</field>
         <field name="arch" type="xml">
             <list>
-                <field name="name"/>
-                <field name="coste"/>
-                <field name="aceptada"/>
+                <field name="name" />
+                <field name="coste" />
+                <field name="iva" />
+                <field name="total" />
+                <field name="aceptada" />
             </list>
         </field>
     </record>
 
-    <record id="action_obras" model="ir.actions.act_window"> 
+    <record id="view_obra_form" model="ir.ui.view">
+        <field name="name">obras.obra.form</field>
+        <field name="model">obras.obra</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <!-- BANNERS CONDICIONALES -->
+                    <div class="alert alert-info text-center fw-bold"
+                        role="alert"
+                        invisible="aceptada == True">
+                        <i class="oi oi-warning me-2" /> 🚧 ESTA OBRA AÚN NO HA SIDO ACEPTADA 🚧 
+                    </div>
+                    <div class="alert alert-success text-center fw-bold"
+                        role="alert"
+                        invisible="aceptada == False">
+                        <i class="oi oi-check me-2" /> ✅ OBRA APROBADA Y LISTA PARA EMPEZAR 
+                    </div>
+
+
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" placeholder="Nombre de la obra..." />
+                        </h1>
+                    </div>
+                    <group>
+                        <group name="left">
+                            <field name="coste" widget="monetary" />
+                            <field name="aceptada" widget="boolean_toggle" />
+                        </group>
+                        <group name="right" class="my_custom_class">
+                            <field name="iva" readonly="true" class="text-muted" />
+                            <field name="total" class="fw-bold text-primary" />
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_obras" model="ir.actions.act_window">
         <field name="name">Obras</field>
         <field name="res_model">obras.obra</field>
         <field name="view_mode">list,form</field>
     </record>
 
-    <menuitem id="menu_obras_root" name="Obras App"/>
-    <menuitem id="menu_obras_list" name="Mis Obras" parent="menu_obras_root" action="action_obras"/>
+    <menuitem id="menu_obras_root" name="Obras App" />
+    <menuitem id="menu_obras_list" name="Mis Obras" parent="menu_obras_root" action="action_obras" />
 </odoo>

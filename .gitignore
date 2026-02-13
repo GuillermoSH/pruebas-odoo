@@ -1,3 +1,5 @@
 __pycache__/
 *.pyc
 /config/odoo.conf
+.env
+/venv/
