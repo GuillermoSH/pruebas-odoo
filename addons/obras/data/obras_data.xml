@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="stage_presupuesto" model="crm.stage">
+            <field name="name">Presupuesto</field>
+            <field name="sequence">10</field>
+        </record>
+        <record id="stage_diseno" model="crm.stage">
+            <field name="name">Diseño</field>
+            <field name="sequence">20</field>
+        </record>
+        <record id="stage_ejecucion" model="crm.stage">
+            <field name="name">Ejecución</field>
+            <field name="sequence">30</field>
+        </record>
+    </data>
+</odoo>

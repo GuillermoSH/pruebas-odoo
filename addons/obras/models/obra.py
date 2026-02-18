@@ -5,6 +5,14 @@ class Obra(models.Model):
     _description = 'Registro de Obras'
 
     name = fields.Char(string='Obra', required=True)
+
+    stage_id = fields.Many2one(
+        'crm.stage', 
+        string='Etapa', 
+        group_expand='_read_group_stage_ids', # Para que aparezcan las columnas vacías
+        default=lambda self: self.env['crm.stage'].search([], limit=1),
+    )
+
     coste = fields.Float(string='Coste de Obra')
     aceptada = fields.Boolean(string='Aceptada', default=False)
 
@@ -21,3 +29,7 @@ class Obra(models.Model):
     def _compute_total(self):
         for record in self:
             record.total = record.coste + record.iva
+
+    @api.model
+    def _read_group_stage_ids(self, stages, domain, order=None):
+        return stages.search([])

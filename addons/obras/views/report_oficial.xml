@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="report_oficial_template">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.external_layout">
+                    <div class="page" style="color: #2c3e50;">
+                        <div class="row" style="background: linear-gradient(135deg, #343a40 0%, #212529 100%); color: #ffffff; padding: 30px; border-radius: 0 50px 0 50px; margin-bottom: 30px;">
+                            <div class="col-7">
+                                <h1 style="font-weight: bold; color: #ffffff !important; margin: 0;">FACTURA OFICIAL</h1>
+                                <p style="color: #adb5bd !important; font-size: 1.1em; margin-top: 5px;">Ref: <span t-field="o.name"/></p>
+                            </div>
+                            <div class="col-5 text-end">
+                                <h2 style="color: #ffffff !important; font-weight: bold; margin: 0;"><span t-field="o.total"/> €</h2>
+                                <p style="color: #ffc107 !important; text-transform: uppercase; letter-spacing: 2px; font-weight: bold; margin: 0;">Total a Pagar</p>
+                            </div>
+                        </div>
+
+                        <div class="row mb-5">
+                            <div class="col-6">
+                                <h5 style="color: #343a40; border-bottom: 3px solid #ffc107; display: inline-block;">DATOS DEL CLIENTE</h5>
+                                <div class="mt-2" style="font-size: 0.9em;">
+                                    <p>Detalles de facturación del cliente aquí...</p>
+                                </div>
+                            </div>
+                            <div class="col-6 text-end">
+                                <h5 style="color: #343a40; border-bottom: 3px solid #ffc107; display: inline-block;">FECHAS Y ESTADO</h5>
+                                <p class="mt-2"><strong>Emisión:</strong> <span t-field="o.create_date" t-options='{"widget": "date"}'/><br/>
+                                <strong>Estado Obra:</strong> <span class="badge" style="background-color: #343a40; color: white;" t-field="o.stage_id.name"/></p>
+                            </div>
+                        </div>
+
+                        <table class="table table-sm" style="border-collapse: separate; border-spacing: 0 10px;">
+                            <thead>
+                                <tr style="background-color: #f8f9fa; border-bottom: 2px solid #343a40;">
+                                    <th style="padding: 15px;">CONCEPTO</th>
+                                    <th class="text-end" style="padding: 15px;">IMPORTE NETO</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr style="background-color: #ffffff;">
+                                    <td style="padding: 15px; border-bottom: 1px solid #dee2e6;">Ejecución de proyecto: <span t-field="o.name"/></td>
+                                    <td class="text-end" style="padding: 15px; border-bottom: 1px solid #dee2e6;"><span t-field="o.coste"/> €</td>
+                                </tr>
+                                <tr>
+                                    <td class="text-end" style="padding: 10px;"><strong>IVA (21%)</strong></td>
+                                    <td class="text-end" style="padding: 10px;"><span t-field="o.iva"/> €</td>
+                                </tr>
+                                <tr style="background-color: #343a40; color: #ffffff;">
+                                    <td class="text-end" style="padding: 15px; border-radius: 10px 0 0 10px; color: white;"><strong>TOTAL FACTURA</strong></td>
+                                    <td class="text-end" style="padding: 15px; border-radius: 0 10px 10px 0; color: white;"><strong><span t-field="o.total"/> €</strong></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>
