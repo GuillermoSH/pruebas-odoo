@@ -3,46 +3,118 @@
     <template id="report_proforma_template">
         <t t-call="web.html_container">
             <t t-foreach="docs" t-as="o">
-                <t t-call="web.external_layout">
-                    <div class="page" style="background-color: #fcfdfe; position: relative;">
-                        <div class="row mt-4 mb-4" style="border-left: 10px solid #007bff; padding: 20px; background-color: #ffffff; box-shadow: 2px 2px 10px rgba(0,0,0,0.05);">
-                            <div class="col-12">
-                                <h2 style="color: #007bff; font-weight: bold; margin-bottom: 0;">FACTURA PROFORMA</h2>
-                                <span style="color: #6c757d; font-size: 0.9em; letter-spacing: 1px;">DOCUMENTO PRELIMINAR</span>
-                            </div>
+                <t t-call="prisma_reports.external_layout_prisma">
+                    <div class="page" style="box-sizing: border-box;">
+                        <div
+                            style="border-left: 6px solid #003f7e; border-radius: 10px; padding: 15px 20px; background-color: #E6E8F0; margin-bottom: 30px;">
+                            <h2
+                                style="color: #003f7e; margin: 0; font-weight: bold; font-size: 22px;">FACTURA
+                                PROFORMA</h2>
+                            <p
+                                style="margin: 3px 0 0 0; color: #6c757d; text-transform: uppercase; font-size: 10px; letter-spacing: 2px;">Presupuesto
+                                Estimativo de Obra</p>
                         </div>
 
-                        <div class="row mb-5">
-                            <div class="col-6" style="padding: 15px; background-color: #ffffff; border: 1px solid #e9ecef; border-radius: 5px;">
-                                <strong style="color: #007bff;">INFORMACIÓN DEL PROYECTO</strong><br/>
-                                <h4 class="mt-2" t-field="o.name"/>
-                                <p class="m-0">Fecha Emisión: <span t-field="o.create_date" t-options='{"widget": "date"}'/></p>
-                            </div>
-                        </div>
+                        <table
+                            style="width: 100%; background-color: white; padding: 25px; border-radius: 8px; border: 0px solid #fff; margin-bottom: 30px;">
+                            <tr>
+                                <td style="width: 55%; padding: 20px;">
+                                    <span
+                                        style="color: #003f7e; font-size: 10px; font-weight: bold; text-transform: uppercase; display: block; margin-bottom: 3px;">
+                                        Cliente</span>
+                                    <div t-if="o.partner_id">
+                                        <div
+                                            style="font-weight: bold; font-size: 16px; color: #003f7e;">
+                                            <span t-field="o.partner_id.name" />
+                                        </div>
+                                        <div
+                                            style="margin-top: 4px; font-weight: bold; font-size: 16px; color: #003f7e;">
+                                            CIF/NIF: <span t-field="o.partner_id.vat" /><br />
+                                                <span
+                                                t-field="o.partner_id.city" />, <span
+                                                t-field="o.partner_id.country_id.name" />
+                                        </div>
+                                    </div>
+                                    <div t-else="" class="text-muted">No se ha asignado cliente</div>
+                                </td>
+                                <td style="width: 45%; padding: 20px; vertical-align: top;">
+                                    <div style="margin-bottom: 12px;">
+                                        <span
+                                            style="color: #003f7e; font-size: 10px; font-weight: bold; text-transform: uppercase; display: block; margin-bottom: 3px;">Nombre
+                                            del Proyecto</span>
+                                        <div class="text-muted" style="font-weight: bold;">
+                                            <span t-field="o.name" />
+                                        </div>
+                                    </div>
+                                    <div style="display: inline-block; width: 48%;">
+                                        <span
+                                            style="color: #003f7e; font-size: 10px; font-weight: bold; text-transform: uppercase; display: block; margin-bottom: 3px;">
+                                            Fecha</span>
+                                        <div
+                                            class="text-muted" style="font-weight: bold; font-size: 16px;">
+                                            <span t-field="o.create_date"
+                                                t-options='{"widget": "date"}' />
+                                        </div>
+                                    </div>
+                                    <div style="display: inline-block; width: 48%;">
+                                        <span
+                                            style="color: #003f7e; font-size: 10px; font-weight: bold; text-transform: uppercase; display: block; margin-bottom: 3px;">
+                                            Estado</span>
+                                        <div
+                                            class="text-muted" style="font-weight: bold; font-size: 16px;">
+                                            <span t-field="o.kanban_state" />
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
 
-                        <table class="table" style="background-color: #ffffff;">
-                            <thead style="background-color: #007bff; color: white;">
-                                <tr>
-                                    <th style="color: white !important;">DESCRIPCIÓN</th>
-                                    <th class="text-end" style="color: white !important;">BASE</th>
-                                    <th class="text-end" style="color: white !important;">IVA</th>
-                                    <th class="text-end" style="color: white !important;">TOTAL</th>
+                        <table style="width: 100%; border-radius: 10px; overflow: hidden; border: 0px solid #eee; box-shadow: 0 1px 3px rgba(0,0,0,0.5);">
+                            <thead>
+                                <tr style="background-color: #2c3e50; color: white; border-radius: 10px 10px 0 0;">
+                                    <th style="padding: 15px; text-align: left; font-size: 12px;">
+                                        DESCRIPCIÓN</th>
+                                    <th
+                                        style="padding: 15px; text-align: right; font-size: 12px; width: 100px;">BASE
+                                        IMP.</th>
+                                    <th
+                                        style="padding: 15px; text-align: right; font-size: 12px; width: 80px;">
+                                        IVA</th>
+                                    <th
+                                        style="padding: 15px; text-align: right; font-size: 12px; width: 100px;">
+                                        TOTAL</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr>
-                                    <td>Servicios integrales de construcción</td>
-                                    <td class="text-end"><span t-field="o.coste"/> €</td>
-                                    <td class="text-end"><span t-field="o.iva"/> €</td>
-                                    <td class="text-end" style="background-color: #f1f8ff; font-weight: bold;"><span t-field="o.total"/> €</td>
+                                <tr style="border-radius: 0 0 10px 10px;">
+                                    <td style="padding: 20px; font-size: 14px; color: #4a5568;">
+                                        Ejecución y materiales para obra: <span t-field="o.name" />
+                                    </td>
+                                    <td style="padding: 20px; text-align: right; color: #4a5568;">
+                                        <span t-field="o.coste"
+                                            t-options='{"widget": "monetary", "display_currency": o.company_id.currency_id}' />
+                                    </td>
+                                    <td style="padding: 20px; text-align: right; color: #4a5568;">
+                                        <span t-field="o.iva"
+                                            t-options='{"widget": "monetary", "display_currency": o.company_id.currency_id}' />
+                                    </td>
+                                    <td
+                                        style="padding: 20px; text-align: right; font-weight: bold; color: #003f7e; font-size: 16px;">
+                                        <span t-field="o.total"
+                                            t-options='{"widget": "monetary", "display_currency": o.company_id.currency_id}' />
+                                    </td>
                                 </tr>
                             </tbody>
                         </table>
 
-                        <div class="mt-5 p-3" style="background-color: #fff3cd; border-radius: 5px; color: #856404; font-size: 0.85em;">
-                            <strong>Aviso Importante:</strong> Esta proforma tiene una validez de 15 días naturales. El precio puede variar según ajustes técnicos en la obra.
-                        </div>
+                        <div
+                            style="margin-top: 40px; font-size: 11px; color: #856404; background-color: #fff3cd; padding: 15px; border-radius: 10px; border-left: 4px solid #ffeeba;">
+                            <strong>Condiciones:</strong> Esta factura proforma tiene una validez de
+                            30 días naturales. El inicio de la obra queda sujeto a la aceptación
+                            firmada de este presupuesto y disponibilidad de agenda. Los precios
+                            finales pueden variar según mediciones finales de obra. </div>
                     </div>
+
                 </t>
             </t>
         </t>

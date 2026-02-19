@@ -3,52 +3,101 @@
     <template id="report_oficial_template">
         <t t-call="web.html_container">
             <t t-foreach="docs" t-as="o">
-                <t t-call="web.external_layout">
-                    <div class="page" style="color: #2c3e50;">
-                        <div class="row" style="background: linear-gradient(135deg, #343a40 0%, #212529 100%); color: #ffffff; padding: 30px; border-radius: 0 50px 0 50px; margin-bottom: 30px;">
-                            <div class="col-7">
-                                <h1 style="font-weight: bold; color: #ffffff !important; margin: 0;">FACTURA OFICIAL</h1>
-                                <p style="color: #adb5bd !important; font-size: 1.1em; margin-top: 5px;">Ref: <span t-field="o.name"/></p>
-                            </div>
-                            <div class="col-5 text-end">
-                                <h2 style="color: #ffffff !important; font-weight: bold; margin: 0;"><span t-field="o.total"/> €</h2>
-                                <p style="color: #ffc107 !important; text-transform: uppercase; letter-spacing: 2px; font-weight: bold; margin: 0;">Total a Pagar</p>
-                            </div>
+                <t t-call="prisma_reports.external_layout_prisma">
+                    <div class="page" style="font-family: 'Helvetica'; color: #2c3e50;">
+
+                        <table style="width: 100%; margin-bottom: 20px; border: 0px solid #fff;">
+                            <tr>
+                                <td style="width: 50%;">
+                                    <t t-if="o.partner_id and o.partner_id.image_1920">
+                                        <img t-att-src="image_data_uri(o.partner_id.image_1920)"
+                                            style="max-height: 80px;" />
+                                    </t>
+                                </td>
+                                <td
+                                    style="width: 50%; text-align: right; font-size: 12px; color: #718096;">
+                                    <t t-if="o.partner_id">
+                                        <strong style="color: #003f7e;" t-field="o.partner_id.name" />
+                                        <br />
+                                        <span t-field="o.partner_id.street" />
+                                        <br />
+                                        <span t-field="o.partner_id.city" />
+                                        <t t-if="o.partner_id.country_id"> , <span
+                                                t-field="o.partner_id.country_id.name" />
+                                        </t>
+                                        <br />
+                                        <t t-if="o.partner_id.vat"> ID: <span
+                                                t-field="o.partner_id.vat" />
+                                        </t>
+                                    </t>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <div
+                            style="width: 100%; border-left: 6px solid #003f7e; border-radius: 10px; padding: 25px 30px; background-color: #E6E8F0; margin-bottom: 30px;">
+                            <table style="width: 100%; border: 0px solid #fff; border-collapse: collapse;">
+                                <tr>
+                                    <td style="vertical-align: middle; text-align: left; border: 1px solid #E6E8F0;">
+                                        <h1
+                                            style="margin: 0; padding: 0; color: #003f7e !important; font-weight: bold; font-size: 28px; line-height: 1.1;">
+                                            FACTURA OFICIAL
+                                        </h1>
+                                        <p
+                                            style="margin: 5px 0 0 0; padding: 0; color: #6c757d !important; text-transform: uppercase; font-size: 10px; letter-spacing: 1px; white-space: nowrap;">
+                                            Referencia: <span t-field="o.name" />
+                                        </p>
+                                    </td>
+
+                                    <td style="vertical-align: middle; text-align: right; border: 1px solid #E6E8F0;">
+                                        <h2
+                                            style="margin: 0; padding: 0; color: #003f7e !important; font-weight: bold; font-size: 24px; line-height: 1.1;">
+                                            <span t-field="o.total"
+                                                t-options='{"widget": "monetary", "display_currency": o.company_id.currency_id}' />
+                                        </h2>
+                                        <p
+                                            style="margin: 2px 0 0 0; padding: 0; color: #6c757d !important; font-size: 10px; text-transform: uppercase;">
+                                            Total a Pagar
+                                        </p>
+                                    </td>
+                                </tr>
+                            </table>
                         </div>
 
-                        <div class="row mb-5">
-                            <div class="col-6">
-                                <h5 style="color: #343a40; border-bottom: 3px solid #ffc107; display: inline-block;">DATOS DEL CLIENTE</h5>
-                                <div class="mt-2" style="font-size: 0.9em;">
-                                    <p>Detalles de facturación del cliente aquí...</p>
-                                </div>
-                            </div>
-                            <div class="col-6 text-end">
-                                <h5 style="color: #343a40; border-bottom: 3px solid #ffc107; display: inline-block;">FECHAS Y ESTADO</h5>
-                                <p class="mt-2"><strong>Emisión:</strong> <span t-field="o.create_date" t-options='{"widget": "date"}'/><br/>
-                                <strong>Estado Obra:</strong> <span class="badge" style="background-color: #343a40; color: white;" t-field="o.stage_id.name"/></p>
-                            </div>
-                        </div>
-
-                        <table class="table table-sm" style="border-collapse: separate; border-spacing: 0 10px;">
+                        <table
+                            style="width: 100%; border: 0px solid #fff; border-radius: 8px; overflow: hidden;">
                             <thead>
-                                <tr style="background-color: #f8f9fa; border-bottom: 2px solid #343a40;">
-                                    <th style="padding: 15px;">CONCEPTO</th>
-                                    <th class="text-end" style="padding: 15px;">IMPORTE NETO</th>
+                                <tr style="background-color: #2c3e50; color: white;">
+                                    <th
+                                        style="padding: 12px; text-align: left; font-size: 12px; text-transform: uppercase;">Descripción
+                                        del Proyecto</th>
+                                    <th
+                                        style="padding: 12px; text-align: right; font-size: 12px; text-transform: uppercase; width: 120px;">
+                                        Base</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr style="background-color: #ffffff;">
-                                    <td style="padding: 15px; border-bottom: 1px solid #dee2e6;">Ejecución de proyecto: <span t-field="o.name"/></td>
-                                    <td class="text-end" style="padding: 15px; border-bottom: 1px solid #dee2e6;"><span t-field="o.coste"/> €</td>
-                                </tr>
                                 <tr>
-                                    <td class="text-end" style="padding: 10px;"><strong>IVA (21%)</strong></td>
-                                    <td class="text-end" style="padding: 10px;"><span t-field="o.iva"/> €</td>
+                                    <td
+                                        style="padding: 15px; border: 0px solid #fff; color: #4a5568;">
+                                        Ejecución de obra: <span t-field="o.name" />
+                                    </td>
+                                    <td
+                                        style="padding: 15px; border: 0px solid #fff; text-align: right; color: #4a5568;">
+                                        <span t-field="o.coste"
+                                            t-options='{"widget": "monetary", "display_currency": o.company_id.currency_id}' />
+                                    </td>
                                 </tr>
-                                <tr style="background-color: #343a40; color: #ffffff;">
-                                    <td class="text-end" style="padding: 15px; border-radius: 10px 0 0 10px; color: white;"><strong>TOTAL FACTURA</strong></td>
-                                    <td class="text-end" style="padding: 15px; border-radius: 0 10px 10px 0; color: white;"><strong><span t-field="o.total"/> €</strong></td>
+                                <tr style="background-color: #f8fafc; color: #003f7e !important;">
+                                    <td style="padding: 15px; text-align: right;">
+                                        <strong>TOTAL FINAL (IVA INCLUIDO)</strong>
+                                    </td>
+                                    <td style="padding: 15px; text-align: right; font-size: 1.2em;">
+                                        <strong>
+                                            <span t-field="o.total"
+                                                t-options='{"widget": "monetary", "display_currency": o.company_id.currency_id}' />
+                                        </strong>
+                                    </td>
                                 </tr>
                             </tbody>
                         </table>

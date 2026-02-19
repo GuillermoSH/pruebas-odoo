@@ -4,7 +4,7 @@
     'summary': 'Módulo básico para seguimiento de obras',
     'category': 'Operations',
     'author': 'GuillermoSH',
-    'depends': ['base', 'crm'],  # Dependencias necesarias
+    'depends': ['mail', 'base', 'crm'],  # Dependencias necesarias
     'data': [
         'security/ir.model.access.csv', # Archivo de seguridad para definir permisos de acceso al modulo
         'data/obras_data.xml', # Datos iniciales, como etapas del CRM

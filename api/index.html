@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Nueva Orden - Prisma</title>
+    <style>
+        body { font-family: sans-serif; background: #f4f7f6; display: flex; justify-content: center; padding: 50px; }
+        .card { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); width: 400px; }
+        h2 { color: #003f7e; margin-top: 0; }
+        input { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; background: #003f7e; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { background: #002a54; }
+        #message { margin-top: 15px; font-size: 14px; text-align: center; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2>Crear Pedido en Odoo</h2>
+    <form id="orderForm">
+        <input type="text" id="customerName" placeholder="Nombre del Cliente" required>
+        <input type="email" id="customerEmail" placeholder="Email del Cliente" required>
+        <input type="text" id="productName" placeholder="Concepto/Producto" required>
+        <input type="number" id="quantity" placeholder="Cantidad" value="1" required>
+        <input type="number" id="price" placeholder="Precio Unidad" step="0.01" required>
+        <button type="submit" id="btnSubmit">Enviar a Odoo</button>
+    </form>
+    <div id="message"></div>
+</div>
+
+<script>
+    document.getElementById('orderForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const btn = document.getElementById('btnSubmit');
+        const msg = document.getElementById('message');
+        
+        btn.disabled = true;
+        msg.innerText = "Enviando...";
+
+        const formData = {
+            customerName: document.getElementById('customerName').value,
+            customerEmail: document.getElementById('customerEmail').value,
+            productName: document.getElementById('productName').value,
+            quantity: document.getElementById('quantity').value,
+            price: document.getElementById('price').value
+        };
+
+        try {
+            const response = await fetch('http://localhost:3000/api/create-order', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData)
+            });
+
+            const result = await response.json();
+            if (result.success) {
+                msg.style.color = "green";
+                msg.innerText = "¡Pedido creado! ID Odoo: " + result.orderId;
+                document.getElementById('orderForm').reset();
+            } else {
+                throw new Error(result.error);
+            }
+        } catch (error) {
+            msg.style.color = "red";
+            msg.innerText = "Error: " + error.message;
+        } finally {
+            btn.disabled = false;
+        }
+    });
+</script>
+
+</body>
+</html>
