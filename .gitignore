@@ -3,3 +3,6 @@ __pycache__/
 /config/odoo.conf
 .env
 /venv/
+.idea/
+.vscode/
+/api/node_modules
