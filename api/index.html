@@ -2,72 +2,152 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Nueva Orden - Prisma</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Ventas - Prisma</title>
     <style>
-        body { font-family: sans-serif; background: #f4f7f6; display: flex; justify-content: center; padding: 50px; }
-        .card { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); width: 400px; }
-        h2 { color: #003f7e; margin-top: 0; }
-        input { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
-        button { width: 100%; padding: 12px; background: #003f7e; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        :root { --primary: #003f7e; --bg: #f4f7f6; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+        .container { display: flex; gap: 20px; width: 100%; max-width: 1200px; margin-top: 20px; }
+        
+        /* Tarjeta Formulario */
+        .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); flex: 1; }
+        h2 { color: var(--primary); margin-top: 0; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.3s; }
         button:hover { background: #002a54; }
-        #message { margin-top: 15px; font-size: 14px; text-align: center; }
+
+        /* Tabla de Pedidos */
+        .list-container { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); flex: 2; overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; font-size: 14px; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; }
+        th { background: #f8f9fa; color: #666; text-transform: uppercase; font-size: 11px; letter-spacing: 1px; }
+        
+        /* Estados */
+        .badge { padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; }
+        .status-draft { background: #fff3cd; color: #856404; }
+        .status-sale { background: #d4edda; color: #155724; }
+        .status-sent { background: #d1ecf1; color: #0c5460; }
+        
+        #message { margin-top: 15px; padding: 10px; border-radius: 6px; display: none; text-align: center; }
     </style>
 </head>
 <body>
 
-<div class="card">
-    <h2>Crear Pedido en Odoo</h2>
-    <form id="orderForm">
-        <input type="text" id="customerName" placeholder="Nombre del Cliente" required>
-        <input type="email" id="customerEmail" placeholder="Email del Cliente" required>
-        <input type="text" id="productName" placeholder="Concepto/Producto" required>
-        <input type="number" id="quantity" placeholder="Cantidad" value="1" required>
-        <input type="number" id="price" placeholder="Precio Unidad" step="0.01" required>
-        <button type="submit" id="btnSubmit">Enviar a Odoo</button>
-    </form>
-    <div id="message"></div>
-</div>
+    <h1>Gestión de Pedidos - Odoo Local</h1>
 
-<script>
-    document.getElementById('orderForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const btn = document.getElementById('btnSubmit');
-        const msg = document.getElementById('message');
-        
-        btn.disabled = true;
-        msg.innerText = "Enviando...";
+    <div class="container">
+        <div class="card">
+            <h2>Nuevo Pedido</h2>
+            <form id="orderForm">
+                <input type="text" id="customerName" placeholder="Nombre del Cliente" required>
+                <input type="email" id="customerEmail" placeholder="Email del Cliente" required>
+                <input type="text" id="productName" placeholder="Producto/Concepto" required>
+                <div style="display: flex; gap: 10px;">
+                    <input type="number" id="quantity" placeholder="Cant." value="1" required>
+                    <input type="number" id="price" placeholder="Precio" step="0.01" required>
+                </div>
+                <input type="hidden" id="productId" value="1"> 
+                
+                <button type="submit" id="btnSubmit">Crear Pedido en Odoo</button>
+            </form>
+            <div id="message"></div>
+        </div>
 
-        const formData = {
-            customerName: document.getElementById('customerName').value,
-            customerEmail: document.getElementById('customerEmail').value,
-            productName: document.getElementById('productName').value,
-            quantity: document.getElementById('quantity').value,
-            price: document.getElementById('price').value
-        };
+        <div class="list-container">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h2>Pedidos Recientes</h2>
+                <button onclick="cargarPedidos()" style="width: auto; padding: 5px 15px;">Refresh</button>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Referencia</th>
+                        <th>Cliente</th>
+                        <th>Total</th>
+                        <th>Estado</th>
+                    </tr>
+                </thead>
+                <tbody id="listaPedidos">
+                    </tbody>
+            </table>
+        </div>
+    </div>
 
-        try {
-            const response = await fetch('http://localhost:3000/api/create-order', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(formData)
-            });
+    <script>
+        const API_BASE = 'http://localhost:3000/api';
 
-            const result = await response.json();
-            if (result.success) {
-                msg.style.color = "green";
-                msg.innerText = "¡Pedido creado! ID Odoo: " + result.orderId;
-                document.getElementById('orderForm').reset();
-            } else {
-                throw new Error(result.error);
+        // Cargar la lista de pedidos
+        async function cargarPedidos() {
+            const tbody = document.getElementById('listaPedidos');
+            try {
+                const res = await fetch(`${API_BASE}/get-sales`);
+                const result = await res.json();
+                
+                if (result.success) {
+                    tbody.innerHTML = result.data.map(order => `
+                        <tr>
+                            <td><strong>${order.name}</strong></td>
+                            <td>${order.partner_id ? order.partner_id[1] : 'N/A'}</td>
+                            <td>${order.amount_total.toFixed(2)} €</td>
+                            <td><span class="badge status-${order.state}">${order.state.toUpperCase()}</span></td>
+                        </tr>
+                    `).join('');
+                }
+            } catch (e) {
+                tbody.innerHTML = '<tr><td colspan="4">Error conectando con Express</td></tr>';
             }
-        } catch (error) {
-            msg.style.color = "red";
-            msg.innerText = "Error: " + error.message;
-        } finally {
-            btn.disabled = false;
         }
-    });
-</script>
 
+        // Envio del formulario para crear un nuevo pedido
+        document.getElementById('orderForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('btnSubmit');
+            const msg = document.getElementById('message');
+            
+            btn.disabled = true;
+            msg.style.display = "block";
+            msg.style.background = "#e2e8f0";
+            msg.innerText = "Procesando...";
+
+            const payload = {
+                customerName: document.getElementById('customerName').value,
+                customerEmail: document.getElementById('customerEmail').value,
+                productName: document.getElementById('productName').value,
+                quantity: document.getElementById('quantity').value,
+                price: document.getElementById('price').value,
+                productId: parseInt(document.getElementById('productId').value)
+            };
+
+            try {
+                const res = await fetch(`${API_BASE}/create-order`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await res.json();
+
+                if (result.success) {
+                    msg.style.background = "#d4edda";
+                    msg.style.color = "#155724";
+                    msg.innerText = "¡Éxito! Pedido " + result.orderId + " creado.";
+                    document.getElementById('orderForm').reset();
+                    // Actualizar la lista automaticamente
+                    cargarPedidos(); 
+                } else {
+                    throw new Error(result.error);
+                }
+            } catch (error) {
+                msg.style.background = "#f8d7da";
+                msg.style.color = "#721c24";
+                msg.innerText = "Error: " + error.message;
+            } finally {
+                btn.disabled = false;
+            }
+        });
+
+        // Carga inicial al abrir la página
+        cargarPedidos();
+    </script>
 </body>
 </html>

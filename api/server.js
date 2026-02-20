@@ -83,4 +83,37 @@ app.post('/api/create-order', async (req, res) => {
     }
 });
 
+app.get('/api/get-sales', async (req, res) => {
+    try {
+        // Autenticacion
+        const uid = await odooCall('common', 'authenticate', [
+            ODOO_CONFIG.db,
+            ODOO_CONFIG.username,
+            ODOO_CONFIG.apiKey,
+            {}
+        ]);
+
+        if (!uid) return res.status(401).json({ error: "Auth failed" });
+
+        // Traer pedidos de venta ([] son todos los registros, y el segundo array son los campos que queremos)
+        const sales = await odooCall('object', 'execute_kw', [
+            ODOO_CONFIG.db, 
+            uid, 
+            ODOO_CONFIG.apiKey,
+            'sale.order', 
+            'search_read',
+            [
+                [], // Sin filtros
+                ['name', 'partner_id', 'amount_total', 'state', 'date_order'] // Campos que queremos recibir
+            ]
+        ]);
+
+        res.json({ success: true, count: sales.length, data: sales });
+
+    } catch (error) {
+        console.error("Odoo Error:", error.message);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
 app.listen(3000, () => console.log('Server Axios-Odoo en puerto 3000'));

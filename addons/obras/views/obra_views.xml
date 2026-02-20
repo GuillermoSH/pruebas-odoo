@@ -16,10 +16,14 @@
                                 <div><field name="total" widget="monetary" /> €</div>
 
                                 <div
-                                    class="o_kanban_record_bottom mt-2 d-flex justify-content-end align-items-center">
-                                    <div class="o_field_widget ms-1 fs-3">
-                                        <field name="kanban_state" widget="state_selection"
-                                            options="{'hide_label': True}" />
+                                    class="o_kanban_record_bottom mt-2 d-flex justify-content-between align-items-center">
+                                    <div class="d-flex align-items-center">
+                                        <field name="priority" widget="priority" />
+                                        <field name="activity_ids" widget="kanban_activity"
+                                            class="ms-2" />
+                                    </div>
+                                    <div>
+                                        <field name="kanban_state" widget="state_selection" />
                                     </div>
                                 </div>
                             </div>
@@ -67,13 +71,39 @@
                     </div>
 
                     <group>
-                        <group name="left">
-                            <field name="coste" widget="monetary" />
-                            <field name="aceptada" widget="boolean_toggle" />
+                        <group name="left" string="Información de Obra">
+                            <field name="partner_id" widget="res_partner_many2one"
+                                context="{'show_address': 1}" options='{"always_reload": True}' />
+
+                            <label for="fecha_inicio" string="Periodo de Ejecución" />
+                            <div class="o_row">
+                                <field name="fecha_inicio"
+                                    widget="daterange"
+                                    options="{'end_date_field': 'fecha_fin'}"
+                                    class="oe_inline" />
+                            </div>
+
+                            <field name="priority" widget="priority" />
                         </group>
-                        <group name="right" class="my_custom_class">
-                            <field name="iva" readonly="true" class="text-muted" />
-                            <field name="total" class="fw-bold text-primary" />
+
+                        <group name="right" string="Presupuesto y Finanzas">
+                            <label for="coste" />
+                            <div class="o_row">
+                                <field name="coste" widget="monetary"
+                                    options="{'currency_field': 'currency_id'}" />
+                                <span class="text-muted"> + IVA (21%)</span>
+                            </div>
+
+                            <field name="aceptada" widget="boolean_toggle" />
+
+                            <hr colspan="2" class="my-2" />
+
+                            <field name="iva" readonly="1" force_save="1" groups="base.group_no_one" />
+                            <div class="o_td_label">
+                                <label for="total" class="fw-bold" style="font-size: 1.2em;" />
+                            </div>
+                            <field name="total" nolabel="1" class="fw-bold text-primary fs-3"
+                                readonly="1" force_save="1" />
                         </group>
                     </group>
                 </sheet>
@@ -83,10 +113,23 @@
         </field>
     </record>
 
+    <record id="view_obra_calendar" model="ir.ui.view">
+        <field name="name">obras.obra.calendar</field>
+        <field name="model">obras.obra</field>
+        <field name="arch" type="xml">
+            <calendar string="Obras" date_start="fecha_inicio" date_stop="fecha_fin">
+                <field name="name" />
+                <field name="partner_id" />
+                <field name="total" widget="monetary" />
+                <field name="priority" widget="priority" />
+            </calendar>
+        </field>
+    </record>
+
     <record id="action_obras" model="ir.actions.act_window">
         <field name="name">Obras</field>
         <field name="res_model">obras.obra</field>
-        <field name="view_mode">list,kanban,form</field>
+        <field name="view_mode">list,kanban,form,calendar</field>
     </record>
 
     <menuitem id="menu_obras_root" name="Obras App" />
