@@ -1,9 +1,12 @@
 // server.js
 const express = require('express');
+const { Server } = require('socket.io');
 const cors = require('cors');
 const axios = require('axios');
 
 const app = express();
+const server = http.createServer(app);
+const io = new Server(server);
 app.use(express.json());
 app.use(cors());
 
@@ -34,6 +37,16 @@ async function odooCall(service, method, args) {
     
     return response.data.result;
 }
+
+app.post('/webhook-odoo', (req, res) => {
+    const { activar_toast } = req.body;
+
+    if (activar_toast) {
+        io.emit('mostrar_toast', { success: true });
+    }
+
+    res.sendStatus(200);
+});
 
 app.post('/api/create-order', async (req, res) => {
     const { customerName, customerEmail, productName, quantity, price, productId } = req.body;
