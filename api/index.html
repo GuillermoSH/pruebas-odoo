@@ -72,7 +72,7 @@
             </table>
         </div>
     </div>
-    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         const API_BASE = 'http://localhost:3000/api';
@@ -150,7 +150,7 @@
         // Carga inicial al abrir la página
         cargarPedidos();
 
-        const socket = io();
+        const socket = io("http://localhost:3000");
 
         // Escuchar el evento que envía Express
         socket.on('mostrar_toast', (data) => {

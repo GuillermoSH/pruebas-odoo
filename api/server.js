@@ -1,20 +1,29 @@
 // server.js
 const express = require('express');
 const { Server } = require('socket.io');
+const http = require('http');
 const cors = require('cors');
 const axios = require('axios');
 
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server);
+const io = new Server(server, {
+    cors: {
+        origin: "*",
+        methods: ["GET", "POST"]
+    }
+});
 app.use(express.json());
-app.use(cors());
+app.use(cors({
+    origin: "*",
+    methods: ["GET", "POST"]
+}));
 
 const ODOO_CONFIG = {
     url: 'http://localhost:8069/jsonrpc',
     db: 'pruebas_odoo',
     username: 'email@email.com',
-    apiKey: 'b554a101e5c04cae67140a04b038794ff31c8135',
+    apiKey: 'b5c2942119a3eb240f668ba8e295d0d0ce232584',
 };
 
 async function odooCall(service, method, args) {
@@ -129,4 +138,7 @@ app.get('/api/get-sales', async (req, res) => {
     }
 });
 
-app.listen(3000, () => console.log('Server Axios-Odoo en puerto 3000'));
+server.listen(3000, () => {
+    console.log('🚀 Server corriendo en http://localhost:3000');
+    console.log('🔌 Socket.io listo para emitir eventos');
+});
