@@ -1,6 +1,9 @@
 services:
   db:
     image: 'postgres:latest'
+    restart: always
+    ports:
+      - '5432:5432'
     environment:
       - POSTGRES_DB=postgres
       - POSTGRES_PASSWORD=odoo
@@ -10,6 +13,7 @@ services:
 
   web:
     image: 'odoo:latest'
+    restart: always
     depends_on:
       - db
     ports:
@@ -17,6 +21,7 @@ services:
     volumes:
       - ./addons:/mnt/extra-addons
       - ./config:/etc/odoo
+      - odoo-web-data:/var/lib/odoo
     environment:
       - HOST=db
       - USER=odoo
@@ -24,3 +29,4 @@ services:
 
 volumes:
   odoo-db-data:
+  odoo-web-data:
