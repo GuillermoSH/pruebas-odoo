@@ -1,11 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
+    <record id="view_obra_quick_create_form" model="ir.ui.view">
+        <field name="name">obras.obra.form.quick_create</field>
+        <field name="model">obras.obra</field>
+        <field name="arch" type="xml">
+            <form>
+                <group>
+                    <field name="name" placeholder="Ej: Reforma Local Centro"/>
+                    <field name="partner_id" widget="res_partner_many2one"/>
+                    <field name="fecha_inicio"
+                        widget="daterange"
+                        options="{'end_date_field': 'fecha_fin'}"
+                        class="oe_inline" />
+                    <field name="coste" widget="monetary"/>
+                    <field name="priority" widget="priority"/>
+                </group>
+            </form>
+        </field>
+    </record>
     <record id="view_obra_kanban" model="ir.ui.view">
         <field name="name">obras.obra.kanban</field>
         <field name="model">obras.obra</field>
         <field name="arch" type="xml">
-            <kanban default_group_by="stage_id" class="o_kanban_small_column">
+            <kanban default_group_by="stage_id" 
+                class="o_kanban_small_column" 
+                quick_create_view="obras.view_obra_quick_create_form"
+                on_create="quick_create">
                 <field name="kanban_state" />
+                
+                <field name="partner_id" />
+                <field name="coste" />
+                <field name="priority" />
+
                 <templates>
                     <t t-name="card">
                         <div class="oe_kanban_global_click">
@@ -15,12 +41,10 @@
                                 </strong>
                                 <div><field name="total" widget="monetary" /> €</div>
 
-                                <div
-                                    class="o_kanban_record_bottom mt-2 d-flex justify-content-between align-items-center">
+                                <div class="o_kanban_record_bottom mt-2 d-flex justify-content-between align-items-center">
                                     <div class="d-flex align-items-center">
                                         <field name="priority" widget="priority" />
-                                        <field name="activity_ids" widget="kanban_activity"
-                                            class="ms-2" />
+                                        <field name="activity_ids" widget="kanban_activity" class="ms-2" />
                                     </div>
                                     <div>
                                         <field name="kanban_state" widget="state_selection" />
@@ -40,10 +64,14 @@
         <field name="arch" type="xml">
             <form>
                 <header>
+                    <button name="action_view_tasks" 
+                            string="Ver Planificación (Calendario)" 
+                            type="object" 
+                            class="oe_highlight" 
+                            icon="fa-tasks"/>
                     <field name="stage_id" widget="statusbar" options="{'clickable': '1'}" />
                 </header>
                 <sheet>
-                    <!-- BANNERS CONDICIONALES -->
                     <div class="alert alert-info text-center fw-bold"
                         role="alert"
                         invisible="aceptada == True">
@@ -53,14 +81,12 @@
                         invisible="aceptada == False">
                         <i class="oi oi-check me-2" /> ✅ OBRA APROBADA Y LISTA PARA EMPEZAR </div>
 
-
                     <div class="oe_title">
                         <div class="d-flex justify-content-between align-items-start mb-3">
                             <h1 class="flex-grow-1 pe-3">
                                 <field name="name" placeholder="Nombre de la obra..."
                                     class="text-break" />
                             </h1>
-
                             <div class="o_field_project_task_state_selection">
                                 <field name="kanban_state"
                                     widget="state_selection"
@@ -82,8 +108,8 @@
                                     options="{'end_date_field': 'fecha_fin'}"
                                     class="oe_inline" />
                             </div>
-
                             <field name="priority" widget="priority" />
+                            <field name="project_id" placeholder="Selecciona el proyecto para el Gantt..."/>
                         </group>
 
                         <group name="right" string="Presupuesto y Finanzas">
@@ -93,11 +119,8 @@
                                     options="{'currency_field': 'currency_id'}" />
                                 <span class="text-muted"> + IVA (21%)</span>
                             </div>
-
                             <field name="aceptada" widget="boolean_toggle" />
-
                             <hr colspan="2" class="my-2" />
-
                             <field name="iva" readonly="1" force_save="1" groups="base.group_no_one" />
                             <div class="o_td_label">
                                 <label for="total" class="fw-bold" style="font-size: 1.2em;" />
@@ -106,9 +129,38 @@
                                 readonly="1" force_save="1" />
                         </group>
                     </group>
-                </sheet>
 
-                <chatter></chatter>
+                    <notebook>
+                        <page string="📋 Tareas Internas" name="tareas_internas">
+                            <field name="tarea_propia_ids">
+                                <list editable="bottom">
+                                    <field name="name" string="Descripción de la tarea"/>
+                                    <field name="estado" widget="selection"/>
+                                </list>
+                            </field>
+                        </page>
+                        
+                        <page string="🏗️ Planificación (Calendario)" name="tareas_project">
+                            <group>
+                                <field name="project_id" required="1"/> 
+                            </group>
+                            <field name="tarea_project_ids" 
+                                context="{'default_project_id': project_id, 'default_x_obra_id': id}">
+                                <list editable="bottom">
+                                    <field name="name" string="Tarea de Proyecto"/>
+                                    <field name="project_id" column_invisible="True"/>
+                                    <field name="user_ids" widget="many2many_tags" string="Asignados"/>
+                                    <field name="stage_id" 
+                                        domain="[('project_ids', '=', parent.project_id)]" 
+                                        string="Estado"/>
+                                    <field name="x_fecha_inicio" string="Inicio"/>
+                                    <field name="date_deadline" string="Fin"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
             </form>
         </field>
     </record>
@@ -122,6 +174,22 @@
                 <field name="partner_id" />
                 <field name="total" widget="monetary" />
                 <field name="priority" widget="priority" />
+            </calendar>
+        </field>
+    </record>
+
+    <record id="view_task_calendar_obras" model="ir.ui.view">
+        <field name="name">project.task.calendar.obras</field>
+        <field name="model">project.task</field>
+        <field name="arch" type="xml">
+            <calendar string="Tareas de Obra" 
+                    date_start="x_fecha_inicio"
+                    date_stop="date_deadline"
+                    color="user_ids" 
+                    mode="month">
+                <field name="name"/>
+                <field name="x_obra_id"/>
+                <field name="stage_id"/>
             </calendar>
         </field>
     </record>

@@ -1,4 +1,5 @@
-from odoo import models, fields, api
+from odoo import models, fields, api, _
+from odoo.exceptions import ValidationError
 
 class Obra(models.Model):
     _name = 'obras.obra'
@@ -52,6 +53,13 @@ class Obra(models.Model):
 
     total = fields.Float(string='Total con IVA', compute='_compute_total', store=True) # Para almacenar el valor calculado en la base de datos
 
+    # RELACIÓN CON TAREAS PROPIAS
+    tarea_propia_ids = fields.One2many('obras.tarea', 'obra_id', string="Tareas Internas")
+
+    # RELACIÓN CON TAREAS NATIVAS DE PROJECT
+    project_id = fields.Many2one('project.project', string="Proyecto de Planificación")
+    tarea_project_ids = fields.One2many('project.task', 'x_obra_id', string="Tareas de Planificación (Gantt)")
+
     @api.constrains('fecha_inicio', 'fecha_fin')
     # Validacion para que la fecha de fin no sea anterior a la fecha de inicio
     def _check_dates(self):
@@ -100,3 +108,54 @@ class Obra(models.Model):
                     note=f'Se ha marcado la obra "{record.name}" como Urgente... Se debe revisar de inmediato.'
                 )
         return res
+    
+    def action_view_tasks(self):
+        self.ensure_one()
+        view_cal_id = self.env.ref('obras.view_task_calendar_obras').id
+
+        return {
+            'name': 'Calendario de Planificación',
+            'type': 'ir.actions.act_window',
+            'res_model': 'project.task',
+            'view_mode': 'calendar,list,form',
+            'views': [(view_cal_id, 'calendar'), (False, 'list'), (False, 'form')],
+            'context': {
+                'default_x_obra_id': self.id,
+                'default_project_id': self.project_id.id,
+            },
+            'domain': [('x_obra_id', '=', self.id)],
+        }
+    
+class ObraTarea(models.Model):
+    _name = 'obras.tarea'
+    _description = 'Tarea Interna de Obra'
+    
+    name = fields.Char('Tarea', required=True)
+    obra_id = fields.Many2one('obras.obra', ondelete='cascade')
+    estado = fields.Selection([
+        ('borrador', 'Pendiente'),
+        ('proceso', 'En Marcha'),
+        ('hecho', 'Finalizado')
+    ], default='borrador')
+
+class ProjectTask(models.Model):
+    _inherit = 'project.task'
+
+    x_obra_id = fields.Many2one('obras.obra', string="Obra Relacionada")
+    x_fecha_inicio = fields.Date(
+        string='Fecha Inicio Tarea', 
+        default=fields.Date.context_today,
+        store=True,
+        required=True 
+    )
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        for vals in vals_list:
+            # Si estamos creando la tarea desde una Obra...
+            if vals.get('x_obra_id') and not vals.get('project_id'):
+                # Buscamos el proyecto que tiene esa obra
+                obra = self.env['obras.obra'].browse(vals['x_obra_id'])
+                if obra.project_id:
+                    vals['project_id'] = obra.project_id.id
+        return super().create(vals_list)
